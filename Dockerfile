@@ -3,7 +3,8 @@ FROM node:16-alpine
 WORKDIR /app
 COPY package*.json .npmrc ./
 
-RUN npm ci --only=production
+RUN --mount=type=secret,id=npmrc,dst=/app/.npmrc \
+  npm ci --only=production
 
 COPY . .
 
