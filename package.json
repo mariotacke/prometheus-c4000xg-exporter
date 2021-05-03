@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "nodemon -r dotenv/config src/index.js",
-    "build": "docker build -t ghcr.io/mariotacke/prometheus-c4000xg-exporter",
+    "build": "docker build -t ghcr.io/mariotacke/prometheus-c4000xg-exporter .",
     "push": "docker push ghcr.io/mariotacke/prometheus-c4000xg-exporter"
   },
   "repository": {
