@@ -1,5 +1,9 @@
+.git
 node_modules
-npm-debug.log
+.dockerignore
 .editorconfig
 .env
+.gitignore
 .npmrc
+Dockerfile
+npm-debug.log
