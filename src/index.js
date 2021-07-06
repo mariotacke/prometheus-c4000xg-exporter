@@ -12,11 +12,19 @@ const modemClient = new C4000XGClient({
 
 const namespace = process.env.METRICS_NAMESPACE || 'c4000xg';
 
+function getComponents(response) {
+  return Object.keys(response).filter((component) => !/\.Stats$/.test(component))
+}
+
 function updateMetrics(raw) {
-  return Object.keys(raw).reduce((metrics, component) => {
-    for (const originalMetricsName of Object.keys(raw[component])) {
+  const components = getComponents(raw);
+
+  return components.reduce((metrics, component) => {
+    const { Name: name, Alias: alias, MACAddress: macAddress } = raw[component];
+
+    for (const originalMetricsName of Object.keys(raw[`${component}.Stats`])) {
       const metricName = snakeCase(`${namespace} ${originalMetricsName}`);
-      const value = raw[component][originalMetricsName];
+      const value = raw[`${component}.Stats`][originalMetricsName];
 
       if (typeof value !== 'number') {
         continue;
@@ -27,11 +35,12 @@ function updateMetrics(raw) {
       if (!metric) {
         metric = new client.Gauge({
           name: metricName,
+          labelNames: ['component', 'name', 'alias', 'mac_address'],
           help: 'metric_help',
         });
       }
 
-      metric.set(value);
+      metric.set({ component, name, alias, mac_address: macAddress }, value);
     }
 
     return metrics;
@@ -40,7 +49,7 @@ function updateMetrics(raw) {
 
 app.get('/metrics', async function(req, res) {
   try {
-    const response = await modemClient.getDeviceInformation('Device.Ethernet.Link.3.Stats');
+    const response = await modemClient.getDeviceInformation('Device.Ethernet.Link');
 
     updateMetrics(response);
 
